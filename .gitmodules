@@ -1,3 +1,6 @@
 [submodule "torch-rnn"]
 	path = torch-rnn
 	url = https://github.com/jcjohnson/torch-rnn.git
+[submodule "praw"]
+	path = praw
+	url = https://github.com/praw-dev/praw.git
