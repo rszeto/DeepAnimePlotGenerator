@@ -3,7 +3,7 @@
 The Deep Anime Plot Generator is a system that uses a Recurrent Neural Network (RNN) to generate novel anime plot summaries and posts them to Reddit. This code base consists of three major parts:
 
 * **Plot scraper**: Anime plot summaries are scraped from MyAnimeList, and collected into a form that can be fed to the RNN for training.
-* **Torch-RNN**: The code used to train an RNN and generate new text. This is simply a submodule for `torch-rnn` developed by Justin C. Johnson.
+* **Torch-RNN**: The code used to train an RNN and generate new text. This is simply a submodule for `torch-rnn` developed by Justin Johnson.
 * **Reddit bot**: Using a trained RNN, the bot generates new plot summaries and posts them to Reddit. It acts as a server that continuously publishes summaries until you kill it.
 
 This code was tested on Ubuntu 14.04 64-bit.
@@ -109,3 +109,8 @@ When you're ready to turn off the server, just kill it (`Ctrl+C` on Linux). Then
 ```
 deactivate
 ```
+
+
+## Acknowledgements
+
+I would like to thank Andrej Karpathy, Justin Johnson, and the developers of the [Python Reddit API Wrapper (PRAW)](https://github.com/praw-dev/praw) for creating accessible code for training RNNs and interacting with Reddit, respectively. I also want to thank the MyAnimeList community for providing such a great resource for anime and manga information. Finally, I want to thank my friends for encouraging me to do these stupid side projects in my free time.

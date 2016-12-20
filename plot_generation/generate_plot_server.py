@@ -8,7 +8,6 @@ import sys
 from pprint import pprint
 from getpass import getpass
 from prawcore.exceptions import OAuthException
-import pdb
 
 '''
 The command to generate plot from a trained torch-rnn model. Assumptions made about the output
@@ -108,7 +107,6 @@ if __name__ == '__main__':
     
     print('\nNow launching server as /u/' + reddit_user.name)
     print(PLOT_SEPARATOR)
-    pdb.set_trace()
 
     while True:
         # Generate plots in a subprocess and get the output
