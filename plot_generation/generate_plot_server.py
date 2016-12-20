@@ -18,7 +18,7 @@ Temperature is set lower to encourage output more similar to the training data. 
 "=" to encourage the output to start with a plot separator.
 '''
 PREDICT_CMD = 'cd ../torch-rnn; th sample.lua ' \
-        '-checkpoint cv/checkpoint_50000.t7 -length 5000 -temperature 0.5 -start_text ='
+        '-checkpoint cv/checkpoint_59000.t7 -length 5000 -temperature 0.5 -start_text ='
 
 # The basename of the file to load credentials from
 CREDENTIALS_FILE = 'credentials.json'
@@ -31,7 +31,7 @@ PUNCTUATION = [':,-!(.?;']
 # Line to separate plots during server output
 PLOT_SEPARATOR = '=================='
 # Wait time between posts, in seconds
-WAIT_TIME = 60
+WAIT_TIME = 3600
 # The name of the subreddit to publish to
 SUBREDDIT_NAME = 'DeepAnimePlot'
 
