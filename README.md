@@ -80,7 +80,7 @@ th train.lua -input_h5 my_data.h5 -input_json my_data.json -rnn_size 512 -num_la
 Afterwards, you'll have several checkpoints in `$DAPG_ROOT/torch-rnn/cv`; the last checkpoint I got was named `checkpoint_59000.t7`, which I use in the Reddit bot.
 
 
-### Step 3: Run the Reddit bot
+## Step 3: Run the Reddit bot
 
 With our trained model, we can flood the world with new anime ideas using our Reddit bot! First, go into the bot folder, copy or rename the example config file, and modify the fields as needed:
 
