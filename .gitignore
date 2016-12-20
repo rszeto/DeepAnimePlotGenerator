@@ -1,5 +1,5 @@
 *.log
 scraper/node_modules
 plot_summaries/*.txt
-plot_generation/credentials.json
+plot_generation/config.json
 .env/

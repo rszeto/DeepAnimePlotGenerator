@@ -4,7 +4,11 @@ import re
 import time
 import praw
 import json
+import sys
 from pprint import pprint
+from getpass import getpass
+from prawcore.exceptions import OAuthException
+import pdb
 
 '''
 The command to generate plot from a trained torch-rnn model. Assumptions made about the output
@@ -20,8 +24,10 @@ Temperature is set lower to encourage output more similar to the training data. 
 PREDICT_CMD = 'cd ../torch-rnn; th sample.lua ' \
         '-checkpoint cv/checkpoint_59000.t7 -length 5000 -temperature 0.5 -start_text ='
 
-# The basename of the file to load credentials from
-CREDENTIALS_FILE = 'credentials.json'
+# The basename of the file to load config from
+CONFIG_FILE = 'config.json'
+# How many times to ask for username and password before giving up
+MAX_NUM_LOGIN_TRIES = 3
 # How long a plot summary needs to be for submission
 MIN_PLOT_LENGTH = 100
 # About how long a post title should be. Only used as a guide.
@@ -31,7 +37,7 @@ PUNCTUATION = [':,-!(.?;']
 # Line to separate plots during server output
 PLOT_SEPARATOR = '=================='
 # Wait time between posts, in seconds
-WAIT_TIME = 3600
+WAIT_TIME = 1800
 # The name of the subreddit to publish to
 SUBREDDIT_NAME = 'DeepAnimePlot'
 
@@ -71,12 +77,38 @@ if __name__ == '__main__':
     # Set working path to the location of this script
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    # Initialize Reddit client with the credentials form the credentials JSON
-    with open(CREDENTIALS_FILE, 'r') as f:
-        credentials = json.load(f)
-    print('Using the following credentials:')
-    pprint(credentials)
-    reddit = praw.Reddit(**credentials)
+    # Get information from the config JSON
+    with open(CONFIG_FILE, 'r') as f:
+        config = json.load(f)
+    print('Found the following configuration:')
+    pprint(config)
+    print()
+
+    # Request the username and password a few times until authentication works
+    for i in range(MAX_NUM_LOGIN_TRIES):
+        # Get username and password
+        username = raw_input('Reddit username: ')
+        password = getpass('Reddit password: ')
+        # Create Reddit wrapper and verify proper login
+        reddit = praw.Reddit(username=username, password=password, **config)
+        try:
+            reddit_user = reddit.user.me()
+        except OAuthException:
+            # Give up if too many login tries were made
+            if i == MAX_NUM_LOGIN_TRIES - 1:
+                print('Too many failed login attempts. Quitting')
+                sys.exit(1)
+            else:
+                print('Invalid username and/or password, try again')
+                # Login failed, so go to start of loop
+                continue
+
+        # Login succeeded, so break
+        break
+    
+    print('\nNow launching server as /u/' + reddit_user.name)
+    print(PLOT_SEPARATOR)
+    pdb.set_trace()
 
     while True:
         # Generate plots in a subprocess and get the output
