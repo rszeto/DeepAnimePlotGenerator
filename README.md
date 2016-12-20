@@ -29,7 +29,7 @@ You need to create an application with the Reddit user that will act as your bot
 
 After submitting, you will see information about your app under _developed applications_. Expand the area by clicking _edit_ and make note of the following information, which is needed to run the Reddit bot:
 
-* Client ID: This is a 14-character string under _personal use script_ (e.g. SI8pN3DSbt0zor).
+* Client ID: This is a 14-character string that can be found directly under _personal use script_ (e.g. SI8pN3DSbt0zor).
 * Client secret: This is a 28-character string listed under _secret_ (e.g. _xaxkj7HNh8kwg8e5t4m6KvSrbTI)
 
 
@@ -77,16 +77,16 @@ Afterwards, you'll have several checkpoints in `$DAPG_ROOT/torch-rnn/cv`; the la
 
 ### Step 3: Run the Reddit bot
 
-With our trained model, we can flood the world with new anime ideas using our Reddit bot! First, go into the bot folder, copy or rename the example credentials file, and modify the fields as needed:
+With our trained model, we can flood the world with new anime ideas using our Reddit bot! First, go into the bot folder, copy or rename the example config file, and modify the fields as needed:
 
 ```
 cd $DAPG_ROOT
 cd plot_generation
-cp credentials.json.example credentials.json
-# Edit the credentials file
+cp config.json.example config.json
+# Edit the config file
 ```
 
-To fill in the credentials file, copy the client ID and client secret from Step 0 and paste them into the fields for `client_id` and `client_secret`, respectively. Use a nice description for the `user_agent`, and fill in the `username` and `password` for the bot account.
+To fill in the config file, copy the client ID and client secret from Step 0 and paste them into the fields for `client_id` and `client_secret`, respectively. Replace the bits in angle brackets as appropriate.
 
 Then, install the required Python modules in a virtual environment with `pip`. If you don't have `virtualenv`, you can skip that line, but modules will be installed globally. If you don't have `pip`, use the corresponding installer for your Python distribution (e.g. `conda`, `easy_install`, or your package manager).
 
@@ -96,13 +96,13 @@ source .env/bin/activate
 pip install -r requirements.txt
 ```
 
-Finally, start the bot server by running the command below:
+Next, start the bot server by running the command below:
 
 ```
 python generate_plot_server.py
 ```
 
-If everything worked, your Reddit bot will post a new anime plot summary once an hour. And oh, what amazing summaries they shall be!
+It will ask for a Reddit username and password, which are the credentials for the bot account. If everything worked, your Reddit bot will post a new anime plot summary every half-hour. And oh, what amazing summaries they shall be!
 
 When you're ready to turn off the server, just kill it (`Ctrl+C` on Linux). Then, deactivate your virtual environment:
 
