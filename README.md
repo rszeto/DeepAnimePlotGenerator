@@ -38,6 +38,11 @@ After submitting, you will see information about your app under _developed appli
 I recommend installing [pip](https://pip.pypa.io//en/latest/installing/) and [virtualenv](https://virtualenv.pypa.io/en/stable/installation/), which respectively make installation and management of Python modules convenient. The following steps, as well as `torch-rnn`, assume you have both installed.
 
 
+## Step 0.2: Decide whether to train a model or use the pre-trained one
+
+You do not have to spend the time scraping MAL and training an RNN if you don't want to: I provided a trained model under `plot_generation/model.t7`. If you want to train a model yourself, follow all the steps below. Otherwise, jump to step 3 (Run the Reddit bot). Note that even if you don't train the model yourself, you still need nearly all dependencies listed above, except for Node.js.
+
+
 ## Step 1: Run Plot Scraper
 
 The first step is to download plot summaries to your computer and combine them into one file for processing in `torch-rnn`. To do this, open up a terminal in the root directory of this project and run the lines below.
@@ -56,7 +61,7 @@ python combine_plots.py
 Individual plot summaries, as well as the combined text file to feed to `torch-rnn`, will be saved in the `plot_summaries` folder under the root project directory.
 
 
-## Step 2: Run torch-rnn
+## Step 2: Train a model with torch-rnn
 
 Next, we need to train an RNN on the plot summaries we just downloaded. First, pre-process the combined plot summaries:
 
@@ -86,7 +91,7 @@ cp config.json.example config.json
 # Edit the config file
 ```
 
-To fill in the config file, copy the client ID and client secret from Step 0 and paste them into the fields for `client_id` and `client_secret`, respectively. Replace the bits in angle brackets as appropriate.
+To fill in the config file, copy the client ID and client secret from Step 0 and paste them into the fields for `client_id` and `client_secret`, respectively. Replace the bits in angle brackets as appropriate. For `model_path`, put in the full path to the trained model, whether this is the pre-trained one in this repository or the one you trained with `torch-rnn`.
 
 Then, install the required Python modules in a virtual environment with `pip`. If you don't have `virtualenv`, you can skip that line, but modules will be installed globally. If you don't have `pip`, use the corresponding installer for your Python distribution (e.g. `conda`, `easy_install`, or your package manager).
 

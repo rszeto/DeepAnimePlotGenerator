@@ -19,9 +19,11 @@ of the prediction command:
 
 Temperature is set lower to encourage output more similar to the training data. Start text is
 "=" to encourage the output to start with a plot separator.
+
+The checkpoint path is specified in the config.json file, which fills in the "%s" at runtime.
 '''
-PREDICT_CMD = 'cd ../torch-rnn; th sample.lua ' \
-        '-checkpoint cv/checkpoint_59000.t7 -length 5000 -temperature 0.5 -start_text ='
+PREDICT_CMD_FORMAT = 'cd ../torch-rnn; th sample.lua ' \
+        '-checkpoint %s -length 5000 -temperature 0.5 -start_text ='
 
 # The basename of the file to load config from
 CONFIG_FILE = 'config.json'
@@ -65,7 +67,7 @@ def post_title_from_plot(plot):
     # If title ends with punctuation, remove it
     if title[-1] in PUNCTUATION:
         title = title[:-1]
-    # Return title with ellipses 
+    # Return title with ellipses
     return title + '...'
 
 '''
@@ -89,7 +91,7 @@ if __name__ == '__main__':
         username = raw_input('Reddit username: ')
         password = getpass('Reddit password: ')
         # Create Reddit wrapper and verify proper login
-        reddit = praw.Reddit(username=username, password=password, **config)
+        reddit = praw.Reddit(username=username, password=password, **config["praw_config"])
         try:
             reddit_user = reddit.user.me()
         except OAuthException:
@@ -110,7 +112,7 @@ if __name__ == '__main__':
 
     while True:
         # Generate plots in a subprocess and get the output
-        output = subprocess.check_output(PREDICT_CMD, shell=True)
+        output = subprocess.check_output(PREDICT_CMD_FORMAT % config["model_path"], shell=True)
         # Divide the output according to separation lines, and strip each division (plot). Also
         # remove the first and last plots since they are empty and incomplete, respectively
         plots = [plot.strip() for plot in re.split('=+', output)][1:-1]
