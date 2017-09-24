@@ -1,5 +1,9 @@
 {
 	"model_path": "</path/to/trained/model/model.t7>",
+	"use_gpu": false,
+	"sample_length": 1000,
+	"wait_time": 1800,
+	"subreddit_name": "<subreddit_name>",
 	"praw_config": {
 		"client_id": "<client_id>",
 		"client_secret": "<client_secret>",

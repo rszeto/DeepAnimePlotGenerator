@@ -5,8 +5,10 @@ import time
 import praw
 import json
 import sys
+import Queue
 from pprint import pprint
 from getpass import getpass
+from threading import Thread
 from prawcore.exceptions import OAuthException
 
 '''
@@ -23,7 +25,7 @@ Temperature is set lower to encourage output more similar to the training data. 
 The checkpoint path is specified in the config.json file, which fills in the "%s" at runtime.
 '''
 PREDICT_CMD_FORMAT = 'cd ../torch-rnn; th sample.lua ' \
-        '-checkpoint %s -length 5000 -temperature 0.5 -start_text ='
+        '-checkpoint %s -gpu %d -length %d -temperature 0.5 -start_text ='
 
 # The basename of the file to load config from
 CONFIG_FILE = 'config.json'
@@ -35,12 +37,8 @@ MIN_PLOT_LENGTH = 100
 APPROX_POST_TITLE_LENGTH = 140
 # Characters that look bad when preceeding an ellipses. Used for generation post titles.
 PUNCTUATION = [':,-!(.?;']
-# Line to separate plots during server output
-PLOT_SEPARATOR = '=================='
-# Wait time between posts, in seconds
-WAIT_TIME = 1800
-# The name of the subreddit to publish to
-SUBREDDIT_NAME = 'DeepAnimePlot'
+# How many plots can be in the printing queue at once
+MAX_PLOT_QUEUE_SIZE = 100
 
 '''
 Function that determines whether to publish a plot under various criteria. For now, it
@@ -71,8 +69,27 @@ def post_title_from_plot(plot):
     return title + '...'
 
 '''
-Main loop. It generates some plot summaries and publishes them to /r/DeepAnimePlot, waiting for
-some time between submissions.
+Function used by a queue worker to add plots asynchronously.
+@args:
+    - cmd (str): The command that runs the torch-rnn sampling code
+    - queue (Queue.Queue): The queue storing the generated plots
+'''
+def add_plot_worker(cmd, queue):
+    while True:
+        output = subprocess.check_output(cmd, shell=True)
+        # Divide the output according to separation lines, and strip each division (plot). Also
+        # remove the first and last plots since they are empty and incomplete, respectively
+        plots = [plot.strip() for plot in re.split('=+', output)][1:-1]
+        # Further filter plot by the criteria specified in keep_plot()
+        plots = [plot for plot in plots if keep_plot(plot)]
+        print('Generated %d plots' % len(plots))
+        for plot in plots:
+            queue.put(plot)
+            print('Inserted into queue: "%s..."' % plot[:20])
+
+'''
+Main loop. It generates some plot summaries and publishes them to the specified subreddit,
+waiting for some time between submissions.
 '''
 if __name__ == '__main__':
     # Set working path to the location of this script
@@ -83,7 +100,13 @@ if __name__ == '__main__':
         config = json.load(f)
     print('Found the following configuration:')
     pprint(config)
-    print()
+    print('')
+    # Set relevant variables from configuration
+    wait_time = config['wait_time']
+    subreddit_name = config['subreddit_name']
+    model_path = config['model_path']
+    gpu_id = 0 if config['use_gpu'] else -1
+    sample_length = config['sample_length']
 
     # Request the username and password a few times until authentication works
     for i in range(MAX_NUM_LOGIN_TRIES):
@@ -107,26 +130,29 @@ if __name__ == '__main__':
         # Login succeeded, so break
         break
     
-    print('\nNow launching server as /u/' + reddit_user.name)
-    print(PLOT_SEPARATOR)
+    print('\nNow launching server as /u/%s\n' % reddit_user.name)
+
+    # Generate plots in a separate daemon
+    cmd = PREDICT_CMD_FORMAT % (model_path, gpu_id, sample_length)
+    q = Queue.Queue(maxsize=MAX_PLOT_QUEUE_SIZE)
+    t = Thread(target=add_plot_worker, args=(cmd, q))
+    t.daemon = True
+    t.start()
 
     while True:
-        # Generate plots in a subprocess and get the output
-        output = subprocess.check_output(PREDICT_CMD_FORMAT % config["model_path"], shell=True)
-        # Divide the output according to separation lines, and strip each division (plot). Also
-        # remove the first and last plots since they are empty and incomplete, respectively
-        plots = [plot.strip() for plot in re.split('=+', output)][1:-1]
-        # Further filter plot by the criteria specified in keep_plot()
-        plots = [plot for plot in plots if keep_plot(plot)]
-        # Process all but the first and last plots, which are empty and incomplete respectively
-        for plot in plots:
+        try:
+            plot = q.get(False)
             # Submit the post
-            submission = reddit.subreddit(SUBREDDIT_NAME).submit(
+            submission = reddit.subreddit(subreddit_name).submit(
                     post_title_from_plot(plot), selftext=plot)
             # Print information
+            print("Submitted post: >>>")
             print('Post ID: ' + submission.id)
-            print('Plot:')
+            print("Plot:")
             print(plot)
-            print(PLOT_SEPARATOR)
-            # Wait before posting again
-            time.sleep(WAIT_TIME)
+            print("<<<")
+        except Queue.Empty as e:
+            print("No plots found, sleeping...")
+        
+        # Wait before posting again
+        time.sleep(wait_time)
