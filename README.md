@@ -91,7 +91,7 @@ cp config.json.example config.json
 # Edit the config file
 ```
 
-To fill in the config file, copy the client ID and client secret from Step 0 and paste them into the fields for `client_id` and `client_secret`, respectively. Replace the bits in angle brackets as appropriate. For `model_path`, put in the full path to the trained model, whether this is the pre-trained one in this repository or the one you trained with `torch-rnn`.
+To fill in the config file, replace the bits in angle brackets as appropriate. For `model_path`, put in the full path to the trained model, whether this is the pre-trained one in this repository or the one you trained with `torch-rnn`. For `client_id` and `client_secret`, copy the client ID and client secret from Step 0 and paste them into those fields. For `platform`, put in a string describing your OS (e.g. `ubuntu16.04`).
 
 Then, install the required Python modules in a virtual environment with `pip`. If you don't have `virtualenv`, you can skip that line, but modules will be installed globally. If you don't have `pip`, use the corresponding installer for your Python distribution (e.g. `conda`, `easy_install`, or your package manager).
 
