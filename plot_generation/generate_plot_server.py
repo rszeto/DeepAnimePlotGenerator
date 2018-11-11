@@ -142,17 +142,28 @@ if __name__ == '__main__':
     while True:
         try:
             plot = q.get(False)
-            # Submit the post
-            submission = reddit.subreddit(subreddit_name).submit(
-                    post_title_from_plot(plot), selftext=plot)
-            # Print information
-            print("Submitted post: >>>")
-            print('Post ID: ' + submission.id)
-            print("Plot:")
-            print(plot)
-            print("<<<")
-        except Queue.Empty as e:
+        except Queue.Empty:
             print("No plots found, sleeping...")
+            # Wait before posting again
+            time.sleep(wait_time)
+            continue
+            
+        # Submit the post
+        while True:
+            try:
+                submission = reddit.subreddit(subreddit_name).submit(
+                        post_title_from_plot(plot), selftext=plot)
+                break
+            except praw.exceptions.PRAWException as e:
+                print(e.message)
+                time.sleep(wait_time)
+
+        # Print post information
+        print("Submitted post: >>>")
+        print('Post ID: ' + submission.id)
+        print("Plot:")
+        print(plot)
+        print("<<<")
         
         # Wait before posting again
         time.sleep(wait_time)
